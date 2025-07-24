@@ -1,0 +1,238 @@
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    container_name: morocco_bank_postgres1
+    environment:
+      POSTGRES_DB: morocco_bank_reviews
+      POSTGRES_USER: morocco_app
+      POSTGRES_PASSWORD: secure_password_here
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8"
+    ports:
+      - "5435:5435"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./sql:/docker-entrypoint-initdb.d
+    networks:
+      - morocco_bank_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U morocco_app -d morocco_bank_reviews"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis (for Airflow)
+  redis:
+    image: redis:7-alpine
+    container_name: morocco_bank_redis1
+    ports:
+      - "6379:6379"
+    networks:
+      - morocco_bank_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # Airflow Database
+  airflow-init:
+    image: apache/airflow:2.7.3
+    container_name: morocco_bank_airflow_init1
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    environment: &airflow-common-env
+      AIRFLOW__CORE__EXECUTOR: CeleryExecutor
+      AIRFLOW__DATABASE__SQL_ALCHEMY_CONN: postgresql+psycopg2://morocco_app:secure_password_here@postgres/morocco_bank_reviews
+      AIRFLOW__CELERY__RESULT_BACKEND: db+postgresql://morocco_app:secure_password_here@postgres/morocco_bank_reviews
+      AIRFLOW__CELERY__BROKER_URL: redis://:@redis:6379/0
+      AIRFLOW__CORE__FERNET_KEY: '6Dwi4b0uzPIVkwR4jET7nJTxXc71vvec3TeOEK7zR38='
+      AIRFLOW__CORE__DAGS_ARE_PAUSED_AT_CREATION: 'true'
+      AIRFLOW__CORE__LOAD_EXAMPLES: 'false'
+      AIRFLOW__API__AUTH_BACKENDS: 'airflow.api.auth.backend.basic_auth,airflow.api.auth.backend.session'
+      AIRFLOW__SCHEDULER__ENABLE_HEALTH_CHECK: 'true'
+      _PIP_ADDITIONAL_REQUIREMENTS: 'googlemaps==4.10.0 psycopg2-binary==2.9.9 loguru==0.7.2 pydantic-settings==2.1.0'
+      # Application Configuration
+      GOOGLE_MAPS_API_KEY: 'AIzaSyCjjULEyk9UcNccs40HtCB_qorwgKzew6I'
+      DB_HOST: 'postgres'
+      DB_PORT: '5432'
+      DB_NAME: 'morocco_bank_reviews'
+      DB_USER: 'morocco_app'
+      DB_PASSWORD: 'secure_password_here'
+      DB_URL: 'postgresql://morocco_app:secure_password_here@postgres:5432/morocco_bank_reviews'
+      LOG_LEVEL: 'INFO'
+      ENVIRONMENT: 'development'
+      MAX_REVIEWS_PER_LOCATION: '50'
+      COLLECTION_DELAY_SECONDS: '2'
+      RETRY_ATTEMPTS: '3'
+      MOROCCO_BANKS: 'Attijariwafa Bank,Banque Populaire,BMCE Bank,Crédit Agricole du Maroc,BMCI,Société Générale Maroc,CIH Bank,CDM,Al Barid Bank'
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./src:/opt/airflow/dags/src
+      - ./config:/opt/airflow/dags/config
+    user: "${AIRFLOW_UID:-50000}:0"
+    command: >
+      bash -c "
+      airflow db init &&
+      airflow users create
+      --username admin
+      --firstname Admin
+      --lastname User
+      --role Admin
+      --email admin@example.com
+      --password admin
+      "
+    networks:
+      - morocco_bank_network
+
+  # Airflow Webserver
+  airflow-webserver:
+    image: apache/airflow:2.7.3
+    container_name: morocco_bank_airflow_webserver1
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    environment: *airflow-common-env
+    ports:
+      - "8081:8080"
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./src:/opt/airflow/dags/src
+      - ./config:/opt/airflow/dags/config
+    user: "${AIRFLOW_UID:-50000}:0"
+    command: webserver
+    networks:
+      - morocco_bank_network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Airflow Scheduler
+  airflow-scheduler:
+    image: apache/airflow:2.7.3
+    container_name: morocco_bank_airflow_scheduler1
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    environment: *airflow-common-env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./src:/opt/airflow/dags/src
+      - ./config:/opt/airflow/dags/config
+    user: "${AIRFLOW_UID:-50000}:0"
+    command: scheduler
+    networks:
+      - morocco_bank_network
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type SchedulerJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Airflow Worker
+  airflow-worker:
+    image: apache/airflow:2.7.3
+    container_name: morocco_bank_airflow_worker1
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    environment: *airflow-common-env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./src:/opt/airflow/dags/src
+      - ./config:/opt/airflow/dags/config
+    user: "${AIRFLOW_UID:-50000}:0"
+    command: celery worker
+    networks:
+      - morocco_bank_network
+    healthcheck:
+      test:
+        - "CMD-SHELL"
+        - 'celery --app airflow.executors.celery_executor.app inspect ping -d "celery@$${HOSTNAME}"'
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Airflow Triggerer
+  airflow-triggerer:
+    image: apache/airflow:2.7.3
+    container_name: morocco_bank_airflow_triggerer1
+    depends_on:
+      airflow-init:
+        condition: service_completed_successfully
+    environment: *airflow-common-env
+    volumes:
+      - ./dags:/opt/airflow/dags
+      - ./logs:/opt/airflow/logs
+      - ./plugins:/opt/airflow/plugins
+      - ./src:/opt/airflow/dags/src
+      - ./config:/opt/airflow/dags/config
+    user: "${AIRFLOW_UID:-50000}:0"
+    command: triggerer
+    networks:
+      - morocco_bank_network
+    healthcheck:
+      test: ["CMD-SHELL", 'airflow jobs check --job-type TriggererJob --hostname "$${HOSTNAME}"']
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # Flower (Celery monitoring)
+  flower:
+    image: apache/airflow:2.7.3
+    container_name: morocco_bank_flower1
+    depends_on:
+      redis:
+        condition: service_healthy
+    environment: *airflow-common-env
+    ports:
+      - "5555:5555"
+    command: celery flower
+    networks:
+      - morocco_bank_network
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://localhost:5555/"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # pgAdmin (PostgreSQL management interface)
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: morocco_bank_pgadmin1
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@morocco-bank.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+      PGADMIN_CONFIG_SERVER_MODE: 'False'
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+    networks:
+      - morocco_bank_network
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+  pgadmin_data:
+    driver: local
+
+networks:
+  morocco_bank_network:
+    driver: bridge 

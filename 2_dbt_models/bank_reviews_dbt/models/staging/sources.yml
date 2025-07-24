@@ -1,0 +1,67 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: Raw bank reviews data collected from Google Maps API
+    schema: raw_data
+    tables:
+      - name: bank_reviews
+        description: Raw bank reviews with basic information
+        columns:
+          - name: review_id
+            description: Unique identifier for each review
+            tests:
+              - unique
+              - not_null
+          - name: place_id
+            description: Google Maps place identifier
+          - name: bank_name
+            description: Name of the bank
+          - name: branch_name
+            description: Name of the bank branch
+          - name: author_name
+            description: Name of the review author
+          - name: rating
+            description: Star rating (1-5)
+            tests:
+              - accepted_values:
+                  values: [1, 2, 3, 4, 5]
+          - name: text
+            description: Review text content
+          - name: time
+            description: Review timestamp (Unix epoch)
+          - name: collected_at
+            description: Data collection timestamp
+
+  - name: enriched
+    description: NLP-processed and enriched bank reviews data
+    schema: enriched
+    tables:
+      - name: nlp_processed_reviews
+        description: Bank reviews enriched with NLP features
+        columns:
+          - name: review_id
+            description: Unique identifier for each review
+            tests:
+              - unique
+              - not_null
+          - name: sentiment_score
+            description: Sentiment score (-1 to 1)
+            tests:
+              - dbt_utils.accepted_range:
+                  min_value: -1
+                  max_value: 1
+          - name: sentiment_label
+            description: Sentiment classification
+            tests:
+              - accepted_values:
+                  values: ['Positive', 'Negative', 'Neutral']
+          - name: dominant_topic
+            description: Main topic identified in the review
+          - name: word_count
+            description: Number of words in the review
+            tests:
+              - dbt_utils.accepted_range:
+                  min_value: 0
+          - name: detected_language
+            description: Detected language of the review 

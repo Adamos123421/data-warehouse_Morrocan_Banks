@@ -1,0 +1,26 @@
+bank_reviews_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: localhost
+      user: morocco_app
+      password: secure_password_here
+      port: 5432
+      dbname: morocco_bank_reviews
+      schema: bank_reviews
+      threads: 4
+      keepalives_idle: 0
+      search_path: "bank_reviews,public"
+    
+    prod:
+      type: postgres
+      host: localhost
+      user: morocco_app
+      password: secure_password_here
+      port: 5432
+      dbname: morocco_bank_reviews
+      schema: bank_reviews_prod
+      threads: 8
+      keepalives_idle: 0
+      search_path: "bank_reviews_prod,public" 

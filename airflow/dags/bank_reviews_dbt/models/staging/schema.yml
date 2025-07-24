@@ -1,0 +1,76 @@
+version: 2
+
+sources:
+  - name: raw_data
+    description: "Raw data from bank reviews collection"
+    tables:
+      - name: bank_reviews
+        description: "Raw bank reviews data collected from Google Maps API"
+        columns:
+          - name: review_id
+            description: "Unique identifier for each review"
+            tests:
+              - not_null
+              - unique
+          - name: place_id
+            description: "Google Maps place identifier for the bank branch"
+            tests:
+              - not_null
+          - name: bank_name
+            description: "Name of the bank"
+            tests:
+              - not_null
+          - name: text
+            description: "Review text content"
+          - name: rating
+            description: "Review rating (1-5 stars)"
+            tests:
+              - not_null
+              - accepted_values:
+                  values: [1, 2, 3, 4, 5]
+          - name: language
+            description: "Detected language of the review"
+          - name: collected_at
+            description: "Timestamp when the review was collected"
+            tests:
+              - not_null
+
+models:
+  - name: stg_raw_reviews
+    description: "Staging model for raw bank reviews with initial cleaning and deduplication"
+    columns:
+      - name: review_id
+        description: "Unique identifier for each review"
+        tests:
+          - not_null
+          - unique
+      - name: place_id
+        description: "Google Maps place identifier"
+        tests:
+          - not_null
+      - name: bank_name
+        description: "Bank name"
+        tests:
+          - not_null
+      - name: review_text
+        description: "Original review text"
+      - name: cleaned_text
+        description: "Normalized and cleaned review text"
+      - name: rating
+        description: "Review rating (1-5)"
+        tests:
+          - not_null
+          - accepted_values:
+              values: [1, 2, 3, 4, 5]
+      - name: rating_category
+        description: "Categorical rating (positive/neutral/negative)"
+        tests:
+          - accepted_values:
+              values: ['positive', 'neutral', 'negative']
+      - name: review_length
+        description: "Character length of the review"
+      - name: data_quality_flag
+        description: "Data quality validation flag"
+        tests:
+          - accepted_values:
+              values: ['valid'] 
