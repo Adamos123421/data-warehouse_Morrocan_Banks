@@ -1,477 +1,399 @@
-# 🏦 Morocco Bank Reviews Data Warehouse
+# Moroccan Bank Data Warehouse
 
-[![Status](https://img.shields.io/badge/Status-Production%20Ready-green.svg)](https://github.com/your-repo)
-[![Docker](https://img.shields.io/badge/Docker-Ready-blue.svg)](https://docker.com/)
-[![Airflow](https://img.shields.io/badge/Airflow-2.7.3-orange.svg)](https://airflow.apache.org/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue.svg)](https://postgresql.org/)
+A comprehensive data warehouse solution for collecting, processing, and analyzing customer reviews from major Moroccan banks using Google Maps API, Apache Airflow, PostgreSQL, and advanced NLP techniques.
 
-> A comprehensive data warehouse solution for analyzing customer reviews of major Moroccan banks using advanced NLP processing and real-time analytics.
+## 🏗️ Architecture Overview
 
-## 📋 Table of Contents
+This project implements a modern data warehouse architecture with the following components:
 
-- [Overview](#-overview)
-- [Features](#-features)
-- [Quick Start](#-quick-start)
-- [Architecture](#-architecture)
-- [Installation](#-installation)
-- [Usage](#-usage)
-- [Data Pipeline](#-data-pipeline)
-- [Business Intelligence](#-business-intelligence)
-- [API Reference](#-api-reference)
-- [Configuration](#-configuration)
-- [Troubleshooting](#-troubleshooting)
-- [Contributing](#-contributing)
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   Google Maps   │    │   Apache        │    │   PostgreSQL    │
+│   API           │───▶│   Airflow       │───▶│   Database      │
+│   (Data Source) │    │   (Orchestration)│    │   (Data Store)  │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   NLP Pipeline  │
+                       │   (Analysis)    │
+                       └─────────────────┘
+                                │
+                                ▼
+                       ┌─────────────────┐
+                       │   Star Schema   │
+                       │   (Analytics)   │
+                       └─────────────────┘
+```
 
-## 🎯 Overview
+## 🎯 Project Objectives
 
-This project implements an end-to-end data warehouse solution that automatically collects, processes, and analyzes customer reviews from 6 major Moroccan banks across 181+ branches. The system provides actionable business intelligence through advanced NLP processing, sentiment analysis, and real-time dashboards.
+- **Automated Data Collection**: Daily collection of customer reviews from major Moroccan banks
+- **Multi-language Support**: Handle French, Arabic, and English reviews
+- **Sentiment Analysis**: Analyze customer sentiment and satisfaction trends
+- **Geographic Analysis**: Track performance across different cities and regions
+- **Real-time Monitoring**: Comprehensive monitoring and alerting system
+- **Scalable Architecture**: Containerized deployment with Docker
 
-### Key Achievements
-- 📊 **883+ reviews** processed from **181+ bank branches**
-- 🏦 **6 major banks** analyzed with complete market coverage
-- 🤖 **100% automated** data collection and processing pipeline
-- 📈 **Real-time analytics** with executive-level dashboards
-- 🌍 **Multi-language support** (Arabic, French, English)
+## 🏦 Supported Banks
 
-## ✨ Features
+The system collects data from the following major Moroccan banks:
 
-### 🚀 **Data Collection**
-- Automated Google Maps API integration
-- Real-time bank branch discovery
-- Intelligent review extraction with deduplication
-- Comprehensive data validation and quality checks
+- Attijariwafa Bank
+- Banque Populaire
+- BMCE Bank
+- Crédit Agricole du Maroc
+- BMCI
+- Société Générale Maroc
+- CIH Bank
+- CDM
+- Al Barid Bank
 
-### 🧠 **Advanced NLP Processing**
-- Multi-algorithm sentiment analysis (TextBlob + VADER)
-- Automated topic modeling with LDA
-- Language detection and text preprocessing
-- Content classification for service mentions and complaints
+## 🏙️ Geographic Coverage
 
-### 📊 **Business Intelligence**
-- Executive-level performance dashboards
-- Bank-by-bank competitive analysis
-- Branch-level operational insights
-- Trend analysis and predictive metrics
+Data is collected from major Moroccan cities including:
+- Casablanca, Rabat, Fès, Marrakech, Agadir
+- Tangier, Meknès, Oujda, Kenitra, Tetouan
+- Safi, Mohammedia
 
-### 🔧 **Technical Excellence**
-- Containerized microservices architecture
-- Apache Airflow orchestration
-- DBT-powered transformation pipeline
-- PostgreSQL data warehouse with optimized schema
+## 🛠️ Technology Stack
+
+### Core Technologies
+- **Apache Airflow 2.7.3**: Workflow orchestration and scheduling
+- **PostgreSQL 15**: Primary data warehouse
+- **Redis**: Message broker for Airflow Celery
+- **Docker & Docker Compose**: Containerization and deployment
+
+### Data Processing
+- **Python 3.9+**: Core programming language
+- **Pandas**: Data manipulation and analysis
+- **TextBlob**: Natural language processing
+- **Scikit-learn**: Machine learning and topic modeling
+- **Google Maps API**: Data collection source
+
+### Monitoring & Management
+- **pgAdmin**: PostgreSQL database management
+- **Flower**: Celery task monitoring
+- **Airflow Web UI**: Workflow monitoring and management
+
+## 📁 Project Structure
+
+```
+moroccan-bank-data-warehouse/
+├── dags/                          # Airflow DAGs
+│   ├── morocco_banks_collection.py           # Data collection pipeline
+│   ├── complete_data_pipeline_fixed.py       # ETL pipeline
+│   ├── phase2_transformation_pipeline.py     # Advanced transformation
+│   ├── nlp_processor_simple.py              # NLP processing
+│   └── run_phase2_transformation.py         # Phase 2 execution
+├── sql/                          # Database scripts
+├── config/                       # Configuration files
+├── logs/                         # Airflow logs
+├── plugins/                      # Airflow plugins
+├── src/                          # Source code
+└── docker-compose.yml           # Docker orchestration
+```
 
 ## 🚀 Quick Start
 
 ### Prerequisites
-```bash
-# Required software
-✅ Docker Desktop 4.0+
-✅ Docker Compose 2.0+
-✅ Git
-✅ Google Maps API Key
-```
 
-### 30-Second Setup
-```bash
-# 1. Clone the repository
-git clone <your-repository-url>
-cd morocco-bank-reviews
+1. **Docker & Docker Compose**: Ensure Docker is installed and running
+2. **Google Maps API Key**: Obtain an API key from Google Cloud Console
+3. **System Requirements**: 
+   - Minimum 8GB RAM
+   - 20GB free disk space
+   - Docker Desktop with 4GB+ memory allocation
 
-# 2. Start the entire stack
-cd airflow
-docker-compose up -d
+### Installation & Setup
 
-# 3. Access Airflow Web UI
-open http://localhost:8081
-# Username: admin | Password: admin
-```
+1. **Clone the Repository**
+   ```bash
+   git clone <repository-url>
+   cd moroccan-bank-data-warehouse
+   ```
 
-### Services Overview
-| Service | URL | Purpose |
-|---------|-----|---------|
-| **Airflow Web UI** | http://localhost:8081 | Pipeline orchestration |
-| **Flower Monitoring** | http://localhost:5555 | Celery task monitoring |
-| **pgAdmin** | http://localhost:5050 | Database management |
-| **PostgreSQL** | localhost:5432 | Data warehouse |
+2. **Configure Environment**
+   ```bash
+   # Set your Google Maps API key
+   export GOOGLE_MAPS_API_KEY="your_api_key_here"
+   ```
 
-## 🏗️ Architecture
+3. **Start the Services**
+   ```bash
+   docker-compose up -d
+   ```
 
-### System Architecture
-```mermaid
-graph TB
-    A[Google Maps API] --> B[Data Collection Layer]
-    B --> C[Apache Airflow]
-    C --> D[PostgreSQL Data Warehouse]
-    D --> E[DBT Transformation]
-    E --> F[Analytics Layer]
-    F --> G[Looker Studio Dashboard]
-    
-    subgraph "Processing Layer"
-        H[NLP Engine]
-        I[Sentiment Analysis]
-        J[Topic Modeling]
-    end
-    
-    C --> H
-    H --> I
-    I --> J
-    J --> D
-```
+4. **Initialize Airflow**
+   ```bash
+   # Wait for services to be healthy, then initialize
+   docker-compose exec airflow-webserver airflow db init
+   ```
 
-### Technology Stack
-| Layer | Technology | Purpose |
-|-------|------------|---------|
-| **Orchestration** | Apache Airflow 2.7.3 | Workflow management |
-| **Database** | PostgreSQL 15 | Data warehouse |
-| **Transformation** | DBT Core | ELT pipeline |
-| **Processing** | Python 3.8+ | NLP and analytics |
-| **Containerization** | Docker + Compose | Service management |
-| **Monitoring** | Flower | Task monitoring |
-| **Visualization** | Looker Studio | Business dashboards |
+5. **Access the Applications**
+   - **Airflow Web UI**: http://localhost:8081 (admin/admin)
+   - **pgAdmin**: http://localhost:5050 (admin@morocco-bank.com/admin)
+   - **Flower**: http://localhost:5555
 
-## 💾 Installation
+## 📊 Data Pipeline Overview
 
-### Step 1: Environment Setup
-```bash
-# Clone and navigate to project
-git clone <repository-url>
-cd morocco-bank-reviews/airflow
+### Phase 1: Data Collection (`morocco_banks_collection`)
 
-# Create environment file (optional)
-cp .env.example .env
-# Edit .env with your configuration
-```
+**Schedule**: Daily at 2:00 AM
 
-### Step 2: Google Maps API Configuration
-```bash
-# Get your API key from Google Cloud Console
-# https://console.cloud.google.com/apis/credentials
+**Process**:
+1. **Bank Discovery**: Searches for bank branches across major Moroccan cities
+2. **Review Collection**: Collects up to 50 reviews per location
+3. **Data Storage**: Stores raw data in PostgreSQL with metadata
+4. **Quality Checks**: Validates data completeness and format
 
-# The API key is already configured in docker-compose.yml
-# For production, move to environment variables
-```
+**Key Features**:
+- Rate limiting to respect API quotas
+- Automatic retry mechanisms
+- Multi-language review collection
+- Geographic coordinate tracking
 
-### Step 3: Start Services
-```bash
-# Start all services in background
-docker-compose up -d
+### Phase 2: Data Transformation (`complete_data_pipeline_fixed`)
 
-# Check service status
-docker-compose ps
+**Schedule**: Daily at 6:00 AM
 
-# View logs (optional)
-docker-compose logs -f airflow-webserver
-```
+**Process**:
+1. **Data Validation**: Checks data availability and quality
+2. **Star Schema Creation**: Builds dimensional model
+3. **Data Cleansing**: Removes duplicates and invalid records
+4. **Aggregation**: Creates summary tables and views
 
-### Step 4: Verify Installation
-```bash
-# Test Airflow connection
-curl http://localhost:8081/health
+**Star Schema Components**:
+- **Fact Table**: `fact_reviews` - Core review data
+- **Dimension Tables**:
+  - `dim_banks` - Bank information
+  - `dim_locations` - Geographic data
+  - `dim_time` - Temporal dimensions
+  - `dim_reviewers` - Reviewer profiles
 
-# Test database connection
-docker-compose exec postgres psql -U morocco_app -d morocco_bank_reviews -c "SELECT version();"
-```
+### Phase 3: Advanced Analytics (`phase2_transformation_pipeline`)
 
-## 🎮 Usage
+**Schedule**: Daily at 8:00 AM
 
-### Running the Data Pipeline
+**Process**:
+1. **NLP Processing**: Sentiment analysis and topic modeling
+2. **Language Detection**: Identifies review languages
+3. **Text Translation**: Translates non-English reviews
+4. **Insight Generation**: Creates analytical views
 
-1. **Access Airflow UI**: http://localhost:8081
-2. **Navigate to DAGs**: Click on "DAGs" in the top menu
-3. **Locate Pipeline**: Find `complete_data_pipeline_fixed`
-4. **Trigger Pipeline**: Click the play button to start
-
-### Pipeline Stages
-```
-1. 🏦 Bank Collection     → Discover bank branches
-2. 📝 Review Collection   → Extract customer reviews  
-3. 🧠 NLP Processing      → Sentiment & topic analysis
-4. 🔄 Data Transformation → DBT models execution
-5. 📊 Analytics Marts     → Business-ready datasets
-```
-
-### Monitoring Pipeline
-- **Airflow UI**: Track DAG runs and task status
-- **Flower**: Monitor Celery worker performance
-- **pgAdmin**: Query and inspect database tables
-
-## 📊 Data Pipeline
-
-### Data Collection Phase
-```python
-# Bank branches discovery
-morocco_banks = [
-    "Attijariwafa Bank", "Banque Populaire", "BMCE Bank",
-    "Crédit Agricole du Maroc", "BMCI", "Société Générale Maroc",
-    "CIH Bank", "CDM", "Al Barid Bank"
-]
-
-# Google Maps API integration
-→ Search for bank branches by name and location
-→ Extract branch details (address, rating, review count)
-→ Collect customer reviews with metadata
-→ Apply data quality validation
-```
-
-### NLP Processing Pipeline
-```python
-# Text preprocessing
-→ Language detection (Arabic/French/English)
-→ Text cleaning and normalization
-→ Remove noise and special characters
-
-# Sentiment analysis
-→ TextBlob sentiment scoring
-→ VADER sentiment analysis
-→ Composite sentiment calculation
-
-# Topic modeling
-→ LDA topic extraction
-→ Service mention detection
-→ Complaint/compliment classification
-```
-
-### DBT Transformation Layers
-
-#### 1. Staging Layer
-```sql
--- Data cleaning and standardization
-{{ ref('stg_bank_reviews') }}
-{{ ref('stg_bank_branches') }}
-```
-
-#### 2. Intermediate Layer
-```sql
--- Business logic and calculations  
-{{ ref('int_sentiment_analysis') }}
-{{ ref('int_topic_modeling') }}
-{{ ref('int_bank_performance') }}
-```
-
-#### 3. Marts Layer
-```sql
--- Analytics-ready datasets
-{{ ref('mart_executive_dashboard') }}
-{{ ref('mart_bank_rankings') }}
-{{ ref('mart_branch_performance') }}
-```
-
-## 📈 Business Intelligence
-
-### Executive Dashboard Metrics
-- **Customer Satisfaction Score**: Weighted sentiment across all reviews
-- **Bank Performance Ranking**: Comparative analysis across institutions
-- **Service Quality Index**: Topic-based service evaluation
-- **Market Share Analysis**: Review volume and engagement metrics
-
-### Operational Analytics
-- **Branch Performance**: Individual location insights
-- **Service Gap Analysis**: Common complaint identification
-- **Customer Voice Trends**: Monthly sentiment tracking
-- **Competitive Intelligence**: Cross-bank comparison
-
-### Sample Insights
-```sql
--- Top performing banks by sentiment
-SELECT 
-    bank_name,
-    AVG(sentiment_score) as avg_sentiment,
-    COUNT(*) as review_count,
-    RANK() OVER (ORDER BY AVG(sentiment_score) DESC) as ranking
-FROM marts.executive_dashboard
-GROUP BY bank_name
-ORDER BY avg_sentiment DESC;
-```
+**Analytics Features**:
+- Sentiment scoring (-1 to +1 scale)
+- Topic categorization (8 predefined topics)
+- Language distribution analysis
+- Temporal trend analysis
 
 ## 🔧 Configuration
 
 ### Environment Variables
-```bash
-# Database Configuration
-POSTGRES_DB=morocco_bank_reviews
-POSTGRES_USER=morocco_app
-POSTGRES_PASSWORD=secure_password_here
 
+Key configuration parameters in `docker-compose.yml`:
+
+```yaml
 # API Configuration
-GOOGLE_MAPS_API_KEY=your_api_key_here
+GOOGLE_MAPS_API_KEY: 'your_api_key_here'
+MAX_REVIEWS_PER_LOCATION: '50'
+COLLECTION_DELAY_SECONDS: '2'
+RETRY_ATTEMPTS: '3'
 
-# Processing Configuration
-MAX_REVIEWS_PER_LOCATION=50
-COLLECTION_DELAY_SECONDS=2
-RETRY_ATTEMPTS=3
-```
+# Database Configuration
+DB_HOST: 'postgres'
+DB_PORT: '5432'
+DB_NAME: 'morocco_bank_reviews'
+DB_USER: 'morocco_app'
+DB_PASSWORD: 'secure_password_here'
 
-### Airflow Configuration
-```python
-# DAG default arguments
-default_args = {
-    'owner': 'data-team',
-    'depends_on_past': False,
-    'start_date': datetime(2024, 1, 1),
-    'email_on_failure': True,
-    'email_on_retry': False,
-    'retries': 3,
-    'retry_delay': timedelta(minutes=5)
-}
+# Application Settings
+LOG_LEVEL: 'INFO'
+ENVIRONMENT: 'development'
 ```
 
 ### Database Schema
-```sql
--- Core tables structure
-raw_data.bank_reviews          -- Raw review data
-raw_data.bank_branches         -- Branch information
-analytics.nlp_enriched_reviews -- NLP processed data
-marts.executive_dashboard      -- Business metrics
-```
 
-## 🔍 Troubleshooting
+The system uses a multi-schema approach:
+
+- **`raw_data`**: Raw collected data
+- **`staging`**: Intermediate processing data
+- **`analytics`**: Final analytical tables
+- **`views`**: Business intelligence views
+
+## 📈 Monitoring & Observability
+
+### Airflow Monitoring
+- **DAG Status**: Monitor pipeline execution in Airflow UI
+- **Task Logs**: Detailed logs for each processing step
+- **XCom**: Data passing between tasks
+- **SLA Monitoring**: Service level agreement tracking
+
+### Database Monitoring
+- **pgAdmin**: Visual database management
+- **Query Performance**: Monitor slow queries
+- **Data Quality**: Automated quality checks
+
+### System Health
+- **Health Checks**: All services include health monitoring
+- **Resource Usage**: Monitor CPU, memory, and disk usage
+- **Error Alerting**: Email notifications for failures
+
+## 🔍 Data Quality & Validation
+
+### Automated Checks
+- **Data Completeness**: Ensures all required fields are present
+- **Data Types**: Validates field formats and types
+- **Duplicate Detection**: Identifies and handles duplicate reviews
+- **API Response Validation**: Verifies Google Maps API responses
+
+### Quality Metrics
+- **Collection Success Rate**: Percentage of successful API calls
+- **Data Freshness**: Time since last successful collection
+- **Coverage Metrics**: Number of banks and locations covered
+- **Review Volume**: Daily/monthly review counts
+
+## 🚨 Troubleshooting
 
 ### Common Issues
 
-#### 1. Airflow Init Failure
+1. **API Rate Limiting**
+   ```bash
+   # Check API quota usage
+   docker-compose logs airflow-scheduler | grep "quota"
+   ```
+
+2. **Database Connection Issues**
+   ```bash
+   # Test database connectivity
+   docker-compose exec postgres psql -U morocco_app -d morocco_bank_reviews
+   ```
+
+3. **Airflow Task Failures**
+   ```bash
+   # Check task logs
+   docker-compose logs airflow-scheduler
+   ```
+
+### Debug Commands
+
 ```bash
-# Check Fernet key configuration
-docker-compose logs airflow-init
+# View all service logs
+docker-compose logs
 
-# Regenerate Fernet key if needed
-python -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
-```
+# Restart specific service
+docker-compose restart airflow-scheduler
 
-#### 2. Database Connection Issues
-```bash
-# Check PostgreSQL status
-docker-compose ps postgres
-
-# Test database connection
-docker-compose exec postgres pg_isready -U morocco_app
-```
-
-#### 3. API Rate Limiting
-```bash
-# Check API key configuration
-# Increase COLLECTION_DELAY_SECONDS in docker-compose.yml
-# Monitor API quota in Google Cloud Console
-```
-
-#### 4. Memory Issues
-```bash
-# Check Docker resource allocation
-docker stats
-
-# Increase Docker memory limit in settings
-# Scale down services if needed
-```
-
-### Health Checks
-```bash
-# Service health overview
+# Check service health
 docker-compose ps
 
-# Detailed service logs
-docker-compose logs [service-name]
-
-# Database connectivity
-curl http://localhost:8081/health
+# Access Airflow CLI
+docker-compose exec airflow-webserver airflow dags list
 ```
 
-## 🚦 Performance Metrics
+## 📊 Analytics & Insights
 
-### Data Quality KPIs
-- **95%+** data quality score across all reviews
-- **0%** duplicate reviews through advanced deduplication
-- **100%** language detection accuracy
+### Available Views
 
-### Processing Performance
-- **< 5 minutes**: Complete NLP processing of 883 reviews
-- **< 2 minutes**: DBT transformation pipeline execution
-- **Daily refresh**: Real-time analytics capability
+1. **`vw_bank_performance_dashboard`**
+   - Overall bank performance metrics
+   - Average ratings by bank
+   - Review volume trends
 
-### System Metrics
-```bash
-# Monitor system performance
-docker stats
+2. **`vw_geographic_analysis`**
+   - Performance by city/region
+   - Geographic distribution of reviews
+   - Regional sentiment analysis
 
-# Check Airflow task performance
-# Access Airflow UI → Admin → Task Duration
+3. **`vw_monthly_trends`**
+   - Monthly performance trends
+   - Seasonal patterns
+   - Year-over-year comparisons
+
+### Sample Queries
+
+```sql
+-- Top performing banks
+SELECT bank_name, AVG(rating) as avg_rating, COUNT(*) as review_count
+FROM analytics.fact_reviews
+GROUP BY bank_name
+ORDER BY avg_rating DESC;
+
+-- Sentiment analysis by city
+SELECT city, AVG(sentiment_score) as avg_sentiment
+FROM analytics.fact_reviews fr
+JOIN analytics.dim_locations dl ON fr.location_id = dl.location_id
+GROUP BY city
+ORDER BY avg_sentiment DESC;
 ```
 
-## 🤝 Contributing
+## 🔐 Security Considerations
+
+### API Security
+- API keys stored as environment variables
+- Rate limiting to prevent abuse
+- Secure API key rotation procedures
+
+### Database Security
+- Isolated network for database services
+- Strong password policies
+- Regular security updates
+
+### Access Control
+- Role-based access in Airflow
+- Database user permissions
+- Audit logging for data access
+
+## 🚀 Scaling & Performance
+
+### Horizontal Scaling
+- Multiple Airflow workers for parallel processing
+- Redis clustering for high availability
+- Database read replicas for analytics
+
+### Performance Optimization
+- Database indexing on frequently queried columns
+- Partitioning for large tables
+- Query optimization and caching
+
+### Resource Management
+- Memory limits for containers
+- CPU allocation for compute-intensive tasks
+- Storage optimization for logs and data
+
+## 📝 Contributing
 
 ### Development Setup
-```bash
-# Development environment
-git clone <repository>
-cd morocco-bank-reviews
-docker-compose -f docker-compose.dev.yml up -d
-```
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests and documentation
+5. Submit a pull request
 
 ### Code Standards
-- **Python**: PEP 8 compliance with Black formatting
-- **SQL**: SQLFluff linting for DBT models
-- **Documentation**: Comprehensive docstrings and comments
+- Follow PEP 8 for Python code
+- Add docstrings for all functions
+- Include type hints where appropriate
+- Write comprehensive tests
 
-### Pull Request Process
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit changes (`git commit -m 'Add amazing feature'`)
-4. Push to branch (`git push origin feature/amazing-feature`)
-5. Open Pull Request
+## 📄 License
 
-## 📊 Data Sources
+This project is licensed under the MIT License - see the LICENSE file for details.
 
-### Google Maps API Endpoints
-- **Places API**: Bank branch discovery
-- **Places Details API**: Branch information and reviews
-- **Geocoding API**: Location standardization
+## 🤝 Support
 
-### Supported Banks
-1. **Attijariwafa Bank** - Morocco's largest bank
-2. **Banque Populaire** - Cooperative banking network
-3. **BMCE Bank** - Corporate and retail banking
-4. **Crédit Agricole du Maroc** - Agricultural development bank
-5. **BMCI** - BNP Paribas subsidiary
-6. **Société Générale Maroc** - French banking group
-7. **CIH Bank** - Housing and construction financing
-8. **CDM** - Mortgage and development bank
-9. **Al Barid Bank** - Postal banking services
+For support and questions:
+- Create an issue in the repository
+- Check the troubleshooting section
+- Review Airflow and PostgreSQL documentation
 
-## 📄 License & Legal
+## 🔄 Version History
 
-### License
-This project is licensed under the MIT License - see [LICENSE](LICENSE) file for details.
-
-### Data Privacy
-- All data collection follows Google Maps API terms of service
-- Public review data only - no private customer information
-- GDPR compliant data processing procedures
-
-### API Usage
-- Google Maps API usage within quota limits
-- Respectful rate limiting implementation
-- Commercial use requires appropriate API licensing
+- **v1.0.0**: Initial release with basic data collection
+- **v1.1.0**: Added NLP processing and sentiment analysis
+- **v1.2.0**: Implemented star schema and advanced analytics
+- **v1.3.0**: Enhanced monitoring and error handling
 
 ---
 
-## 📞 Support & Contact
-
-### Technical Support
-- 📧 **Email**: data-team@company.com
-- 🐛 **Issues**: [GitHub Issues](https://github.com/your-repo/issues)
-- 📖 **Wiki**: [Project Documentation](https://github.com/your-repo/wiki)
-
-### Team
-- **Data Engineering**: Pipeline architecture and development
-- **Analytics**: Business intelligence and insights
-- **DevOps**: Infrastructure and deployment automation
-
----
-
-<div align="center">
-
-**Morocco Bank Reviews Data Warehouse**  
-*Transforming customer feedback into business intelligence*
-
-[![Built with ❤️ in Morocco](https://img.shields.io/badge/Built%20with%20❤️%20in-Morocco-red.svg)](https://github.com/your-repo)
-
-**Last Updated**: June 2025 | **Version**: 2.1 | **Status**: 🟢 Production Ready
-
-</div> 
+**Note**: This documentation is maintained alongside the codebase. For the most up-to-date information, always refer to the latest version in the repository.
